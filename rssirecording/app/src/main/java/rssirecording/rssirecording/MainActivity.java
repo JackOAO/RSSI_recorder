@@ -51,8 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private EditText filenamedefine;
     private Button startB;
     private Button stopB;
+    private Button locationB;
 //    private ColumnChartView mchart;
     private int i = 0;
+    private int write_location_index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +68,10 @@ public class MainActivity extends AppCompatActivity {
         filenamedefine = (EditText) findViewById(R.id.editText);
         startB = (Button) findViewById(R.id.start);
         stopB = (Button) findViewById(R.id.stop);
+        locationB = (Button) findViewById(R.id.location);
         startB.setOnClickListener(ClickIntHere);
         stopB.setOnClickListener(ClickIntHere);
+        locationB.setOnClickListener(ClickIntHere);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 //        mchart = (ColumnChartView) findViewById(R.id.chart);
         // 檢查手機硬體是否為BLE裝置
@@ -110,6 +114,12 @@ public class MainActivity extends AppCompatActivity {
                 //TextView_1 顯示 Click Button_2
                 filenamedefine.setClickable(true);
                 scanLeDevice(false);
+            }
+            else if(v.getId() == locationB.getId()){
+                ++write_location_index;
+                wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+                        "write location"+write_location_index);
+                showtxt.setText("write location");
             }
         }
     };
