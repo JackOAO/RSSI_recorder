@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
         showtxt = (TextView)findViewById(R.id.textView1);
         scrollView = (ScrollView) findViewById(R.id.scrollview1);
         mHandler = new Handler();
-        bluetoothManager = (BluetoothManager)
-                getSystemService(Context.BLUETOOTH_SERVICE);
+//        bluetoothManager = (BluetoothManager)
+//                getSystemService(Context.BLUETOOTH_SERVICE);
         filenamedefine = (EditText) findViewById(R.id.editText);
         startB = (Button) findViewById(R.id.start);
         stopB = (Button) findViewById(R.id.stop);
