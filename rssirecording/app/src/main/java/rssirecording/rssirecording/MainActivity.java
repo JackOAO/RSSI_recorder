@@ -1,11 +1,14 @@
 package rssirecording.rssirecording;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.app.Notification;
+import android.content.IntentFilter;
 import android.os.Environment;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.app.Activity;
@@ -74,22 +77,24 @@ public class MainActivity extends AppCompatActivity {
         locationB.setOnClickListener(ClickIntHere);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 //        mchart = (ColumnChartView) findViewById(R.id.chart);
-        // 檢查手機硬體是否為BLE裝置
+//        檢查手機硬體是否為BLE裝置
         if (!getPackageManager().hasSystemFeature
                 (PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "硬體不支援", Toast.LENGTH_SHORT).show();
             finish();
         }
         // 檢查手機是否開啟藍芽裝置
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Toast.makeText(this, "請開啟藍芽裝置", Toast.LENGTH_SHORT).show();
-            Intent enableBluetooth = new Intent(
-                    BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
-
-        } else {
-//            scanLeDevice(true);
+        if (mBluetoothAdapter == null)
+            Toast.makeText(this, "Your device doesnt support Bluetooth",
+                    Toast.LENGTH_LONG).show();
+        else if (!mBluetoothAdapter.isEnabled()) {
+            Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(BtIntent, 0);
+            Toast.makeText(this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
         }
+        ActivityCompat.requestPermissions(
+                this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
     }
     @Override
     protected void onPause() {
@@ -101,17 +106,12 @@ public class MainActivity extends AppCompatActivity {
         //按下Button事件時會進入這個 function
         public void onClick(View v) {
             if(v.getId() == startB.getId()){
-                //判斷如果是 Button_1 按下時會進入這
-                //TextView_1 顯示 Click Button_1
                 Log.i("myinfotage","clicking");
                 filenamedefine.setClickable(false);
-
                 showtxt.setText("");
                 scanLeDevice(true);
             }
             else if(v.getId() == stopB.getId()){
-                //判斷如果是 Button_2 按下時會進入這
-                //TextView_1 顯示 Click Button_2
                 filenamedefine.setClickable(true);
                 scanLeDevice(false);
             }
@@ -121,9 +121,10 @@ public class MainActivity extends AppCompatActivity {
                         "write location"+write_location_index);
                 showtxt.setText("write location");
             }
+
         }
     };
-    // 掃描藍芽裝置
+//     掃描藍芽裝置
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             mHandler.postDelayed(new Runnable() {
@@ -176,10 +177,10 @@ public class MainActivity extends AppCompatActivity {
                     int startByte = 2;
                     boolean patternFound = false;
 
-                    // 尋找ibeacon
-                    // 先依序尋找第2到第8陣列的元素
+//                     尋找ibeacon
+//                     先依序尋找第2到第8陣列的元素
                     while (startByte <= 5) {
-                        // Identifies an iBeacon
+//                         Identifies an iBeacon
                         if (((int) scanRecord[startByte + 2] & 0xff) == 0x02 &&
                                 // Identifies correct data length
                                 ((int) scanRecord[startByte + 3] & 0xff) == 0x15) {
