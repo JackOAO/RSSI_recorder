@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         //create a thread to do the matching of navigation path and current location
         threadForHandleLbeaconID = new Thread();
         threadForHandleLbeaconID.start();
+        mBluetoothAdapter = bluetoothManager.getAdapter();
 //        檢查手機硬體是否為BLE裝置
         if (!getPackageManager().hasSystemFeature
                 (PackageManager.FEATURE_BLUETOOTH_LE)) {
