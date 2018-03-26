@@ -22,6 +22,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.altbeacon.beacon.BeaconConsumer;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -31,25 +33,34 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
+//    turn on bluetooth
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private static final int REQUEST_ENABLE_BT = 1;
     protected final String Tag = "BeaconSearch";
-    private Handler mHandler;
+//    flash screen
+    private static Handler mHandler;
+//    number is not correct
     private static final long SCAN_PERIOD = 9999999;
-    private DateFormat df = new SimpleDateFormat("h:mm:ss");
+//    time when receive beacon
+    private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
+//    UI text
     private TextView showtxt;
     private ScrollView scrollView;
     private String researchdata;
+    private int i = 0;
+//    write out data
     private File file;
     private EditText filenamedefine;
+    private int write_location_index;
+
+//    button
     private Button startB;
     private Button stopB;
     private Button locationB;
-//    private ColumnChartView mchart;
-    private int i = 0;
-    private int write_location_index;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -271,4 +282,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBeaconServiceConnect() {
+
+    }
 }
