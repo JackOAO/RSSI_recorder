@@ -2,25 +2,18 @@ package rssirecording.rssirecording;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.DownloadManager;
-import android.app.Notification;
-import android.content.IntentFilter;
-import android.os.Environment;
-import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +21,9 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.altbeacon.beacon.BeaconConsumer;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -36,28 +32,35 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import lecho.lib.hellocharts.view.ColumnChartView;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer {
+//    turn on bluetooth
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private static final int REQUEST_ENABLE_BT = 1;
     protected final String Tag = "BeaconSearch";
-    private Handler mHandler;
+//    flash screen
+    private static Handler mHandler;
+//    number is not correct
     private static final long SCAN_PERIOD = 9999999;
-    private DateFormat df = new SimpleDateFormat("h:mm:ss");
+//    time when receive beacon
+    private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
+//    UI text
     private TextView showtxt;
     private ScrollView scrollView;
     private String researchdata;
+    private int i = 0;
+//    write out data
     private File file;
     private EditText filenamedefine;
+    private int write_location_index;
+
+//    button
     private Button startB;
     private Button stopB;
     private Button locationB;
-//    private ColumnChartView mchart;
-    private int i = 0;
-    private int write_location_index;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -279,4 +282,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBeaconServiceConnect() {
+
+    }
 }
