@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -32,6 +34,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -67,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,39 +109,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         beaconManager.setForegroundScanPeriod(1000);
         beaconManager.setForegroundBetweenScanPeriod(2000);
-
-
-        //create a thread to do the matching of navigation path and current location
-        threadForHandleLbeaconID = new Thread();
-        threadForHandleLbeaconID.start();
-
         region = new Region("justGiveMeEverything", null, null, null);
-
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
-        /*
-//        暫時註解以前硬體驗證
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-//        檢查手機硬體是否為BLE裝置
-        if (!getPackageManager().hasSystemFeature
-                (PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "硬體不支援", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-//         檢查手機是否開啟藍芽裝置
-        if (mBluetoothAdapter == null)
-            Toast.makeText(this, "Your device doesnt support Bluetooth",
-                    Toast.LENGTH_LONG).show();
-        else if (!mBluetoothAdapter.isEnabled()) {
-            Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(BtIntent, 0);
-            Toast.makeText(this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
-        }
-        */
         ActivityCompat.requestPermissions(
                 this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-        beaconManager.bind(this);
+        beaconManager.unbind(this);
     }
     private View.OnClickListener ClickIntHere = new View.OnClickListener() {
         @Override
@@ -213,15 +191,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     };
 //    Parser Beacon data
     private void logBeaconData(Beacon beacon) {
-            String[] beacondata = new String[]{
-                    beacon.getId1().toString(),
-                    beacon.getId2().toString(),
-                    beacon.getId3().toString()
-            };
-            Log.i("AAA",
-                    "beacon1:"+beacondata[0]+
-                    "\tbeacon2:"+beacondata[1]+
-                    "\tbeacon3:"+beacondata[2]);
+        String[] beacondata = new String[]{
+                beacon.getId1().toString(),
+                beacon.getId2().toString(),
+                beacon.getId3().toString(),
+                String.valueOf(beacon.getRssi())
+        };
+        String date = df.format(Calendar.getInstance().getTime());
+        researchdata = beacondata[1]+beacondata[2]+"\t"+date+"\t"+beacondata[3];
+        Message msg = new Message();
+        msg.what = 1;
+        mHandler2.sendMessage(msg);
+            Log.i("AAA","beacon:"+researchdata);
 //            Log.i("AAA","Recieved ID: "+CConvX.concat(CConvY)+" Length: "+CConvX.concat(CConvY).length());
     }
 //    output file
