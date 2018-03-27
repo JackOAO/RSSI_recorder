@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //    flash screen
     private static Handler mHandler;
 //    number is not correct
-    private static final long SCAN_PERIOD = 9999999;
+    private static final long SCAN_PERIOD = 1000;
 //    time when receive beacon
     private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
 //    UI text
