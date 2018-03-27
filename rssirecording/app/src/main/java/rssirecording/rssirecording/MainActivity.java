@@ -5,12 +5,11 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,7 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -65,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private Button locationB;
 //    Beacon manager for ranging Lbeaon signal
     private BeaconManager beaconManager;
+    private Region region;
 
 
 
@@ -111,8 +110,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         //create a thread to do the matching of navigation path and current location
         threadForHandleLbeaconID = new Thread();
         threadForHandleLbeaconID.start();
+
+        region = new Region("justGiveMeEverything", null, null, null);
+
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
+        /*
+//        暫時註解以前硬體驗證
         mBluetoothAdapter = bluetoothManager.getAdapter();
 //        檢查手機硬體是否為BLE裝置
         if (!getPackageManager().hasSystemFeature
@@ -129,9 +133,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             startActivityForResult(BtIntent, 0);
             Toast.makeText(this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
         }
+        */
         ActivityCompat.requestPermissions(
                 this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
+        beaconManager.bind(this);
     }
     private View.OnClickListener ClickIntHere = new View.OnClickListener() {
         @Override
@@ -179,6 +185,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
 
         });
+        try {
+            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId",
+                    null, null, null));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
     @SuppressLint("HandlerLeak")
     private Handler mHandler2 = new Handler(){
@@ -201,11 +213,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     };
 //    Parser Beacon data
     private void logBeaconData(Beacon beacon) {
-            String CConvX, CConvY;
-            CConvX = beacon.getId2().toString();
-            CConvY = beacon.getId3().toString();
-            Log.i("AAA","Recieved ID: "+CConvX.concat(CConvY)+" Length: "+CConvX.concat(CConvY).length());
-
+            String[] beacondata = new String[]{
+                    beacon.getId1().toString(),
+                    beacon.getId2().toString(),
+                    beacon.getId3().toString()
+            };
+            Log.i("AAA",
+                    "beacon1:"+beacondata[0]+
+                    "\tbeacon2:"+beacondata[1]+
+                    "\tbeacon3:"+beacondata[2]);
+//            Log.i("AAA","Recieved ID: "+CConvX.concat(CConvY)+" Length: "+CConvX.concat(CConvY).length());
     }
 //    output file
     public void wrtieFileOnInternalStorage(String sFileName, String sBody){
