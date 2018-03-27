@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
 //        Beacon manager setup
         beaconManager =  BeaconManager.getInstanceForApplication(this);
-        beaconManager.bind(this);
+//        beaconManager.bind(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-15,i:16-19,i:20-23,p:24-24"));
 
@@ -106,9 +107,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager.setForegroundScanPeriod(1000);
         beaconManager.setForegroundBetweenScanPeriod(2000);
 
+
         //create a thread to do the matching of navigation path and current location
         threadForHandleLbeaconID = new Thread();
         threadForHandleLbeaconID.start();
+        bluetoothManager = (BluetoothManager)
+                getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 //        檢查手機硬體是否為BLE裝置
         if (!getPackageManager().hasSystemFeature
@@ -153,7 +157,29 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         }
     };
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
+    }
+    @Override
+    public void onBeaconServiceConnect() {
+//Start scanning for Lbeacon signal
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                Log.i("AAA","Beacon Size:"+beacons.size());
+                if (beacons.size() > 0) {
+                    Iterator<Beacon> beaconIterator = beacons.iterator();
+                    while (beaconIterator.hasNext()) {
+                        Beacon beacon = beaconIterator.next();
+                        logBeaconData(beacon);
+                    }
+                }
+            }
 
+        });
+    }
     @SuppressLint("HandlerLeak")
     private Handler mHandler2 = new Handler(){
         @Override
@@ -173,32 +199,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         }
     };
-    @Override
-    public void onBeaconServiceConnect() {
-//Start scanning for Lbeacon signal
-        beaconManager.addRangeNotifier(new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                Log.i("AAA","Beacon Size:"+beacons.size());
-                if (beacons.size() > 0) {
-                    Iterator<Beacon> beaconIterator = beacons.iterator();
-                    while (beaconIterator.hasNext()) {
-                        Beacon beacon = beaconIterator.next();
-                        logBeaconData(beacon);
-                    }
-                }
-            }
-
-        });
-        /*
-        try {
-            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId",
-                    null, null, null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        */
-    }
 //    Parser Beacon data
     private void logBeaconData(Beacon beacon) {
             String CConvX, CConvY;
