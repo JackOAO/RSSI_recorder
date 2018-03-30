@@ -3,15 +3,15 @@ package rssirecording.rssirecording;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,9 +20,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,7 +35,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
+import java.util.Collection;
+import java.util.Iterator;
 
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
@@ -39,10 +44,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     protected final String Tag = "BeaconSearch";
+//    Thread for handling Lbeacon ID while in a navigation tour
+    Thread threadForHandleLbeaconID;
 //    flash screen
     private static Handler mHandler;
+<<<<<<< HEAD
 //    number is not correct
     private static final long SCAN_PERIOD = 1000;
+=======
+>>>>>>> altbeaconUI
 //    time when receive beacon
     private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
 //    UI text
@@ -52,71 +62,88 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private int i = 0;
 //    write out data
     private File file;
-    private EditText filenamedefine;
+    private EditText filenamedefine,ScanPeriodUI,SleepTimeUI;
     private int write_location_index;
-
 //    button
     private Button startB;
     private Button stopB;
     private Button locationB;
+//    Beacon manager for ranging Lbeaon signal
+    private BeaconManager beaconManager;
+    private Region region;
+    private int ScanPeriod = 1000,SleepTime = 2000;
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        init UI objects
         showtxt = (TextView)findViewById(R.id.textView1);
         scrollView = (ScrollView) findViewById(R.id.scrollview1);
-        mHandler = new Handler();
-        bluetoothManager = (BluetoothManager)
-                getSystemService(Context.BLUETOOTH_SERVICE);
         filenamedefine = (EditText) findViewById(R.id.editText);
+        ScanPeriodUI = (EditText) findViewById(R.id.editText2);
+        SleepTimeUI = (EditText) findViewById(R.id.editText3);
         startB = (Button) findViewById(R.id.start);
         stopB = (Button) findViewById(R.id.stop);
         locationB = (Button) findViewById(R.id.location);
         startB.setOnClickListener(ClickIntHere);
         stopB.setOnClickListener(ClickIntHere);
         locationB.setOnClickListener(ClickIntHere);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-//        mchart = (ColumnChartView) findViewById(R.id.chart);
-//        檢查手機硬體是否為BLE裝置
-        if (!getPackageManager().hasSystemFeature
-                (PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "硬體不支援", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        // 檢查手機是否開啟藍芽裝置
-        if (mBluetoothAdapter == null)
-            Toast.makeText(this, "Your device doesnt support Bluetooth",
-                    Toast.LENGTH_LONG).show();
-        else if (!mBluetoothAdapter.isEnabled()) {
-            Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(BtIntent, 0);
-            Toast.makeText(this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
-        }
+//        handler
+        mHandler = new Handler(); //UI text flash
+
+//        Beacon manager setup
+        beaconManager =  BeaconManager.getInstanceForApplication(this);
+//        Detect the LBeacon frame:
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=0215,i:4-15,i:16-19,i:20-23,p:24-24"));
+
+//        setBeaconLayout("m:2-3=0215,i:4-19,i:20-23,i:24-27,p:28-28"));
+//        Detect the Eddystone main identifier (UID) frame:
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+
+//         Detect the Eddystone telemetry (TLM) frame:
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("x,s:0-1=feaa,m:2-2=20,d:3-3,d:4-5,d:6-7,d:8-11,d:12-15"));
+
+//         Detect the Eddystone URL frame:
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20"));
+
+        beaconManager.setForegroundScanPeriod(ScanPeriod);
+        beaconManager.setForegroundBetweenScanPeriod(SleepTime);
+        region = new Region("justGiveMeEverything", null, null, null);
+        bluetoothManager = (BluetoothManager)
+                getSystemService(Context.BLUETOOTH_SERVICE);
         ActivityCompat.requestPermissions(
                 this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        scanLeDevice(false);
+        beaconManager.unbind(this);
     }
     private View.OnClickListener ClickIntHere = new View.OnClickListener() {
         @Override
-        //按下Button事件時會進入這個 function
         public void onClick(View v) {
             if(v.getId() == startB.getId()){
-                Log.i("myinfotage","clicking");
                 filenamedefine.setClickable(false);
+                ScanPeriodUI.setClickable(false);
+                SleepTimeUI.setClickable(false);
+                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
+                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
+                beaconManager.setForegroundScanPeriod(ScanPeriod);
+                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
                 showtxt.setText("");
-                scanLeDevice(true);
+                beaconManager.bind(MainActivity.this);
+                Log.i("AAA","start click");
+//                scanLeDevice(true);
             }
             else if(v.getId() == stopB.getId()){
                 filenamedefine.setClickable(true);
-                scanLeDevice(false);
+//                scanLeDevice(false);
+                beaconManager.unbind(MainActivity.this);
             }
             else if(v.getId() == locationB.getId()){
                 ++write_location_index;
@@ -127,114 +154,35 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         }
     };
-//     掃描藍芽裝置
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    Log.i("myinfotage","stopLescan");
-                }
-            }, SCAN_PERIOD);
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-            Log.i("myinfotage","startLescan in enable");
-        } else {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            Log.i("myinfotage","stopLescan");
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
     }
-    public String bytesToHex(byte[] bytes) {
-
-        char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
-    public double calculateAccuracy(int txPower, double rssi) {
-        if (rssi == 0) {
-            return -1.0;
-        }
-        double ratio = rssi * 1.0 / txPower;
-
-        if (ratio < 1.0) {
-            return Math.pow(ratio, 10);
-        } else {
-            double accuracy = (0.89976) * Math.pow(ratio, 7.7095) + 0.111;
-            return accuracy;
-        }
-    }
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-//                public FileOutputStream outputStream;
-
-                @Override
-                public void onLeScan(final BluetoothDevice device, final int rssi,
-                                     final byte[] scanRecord) {
-                    int startByte = 2;
-                    boolean patternFound = false;
-
-//                     尋找ibeacon
-//                     先依序尋找第2到第8陣列的元素
-                    while (startByte <= 5) {
-//                         Identifies an iBeacon
-                        if (((int) scanRecord[startByte + 2] & 0xff) == 0x02 &&
-                                // Identifies correct data length
-                                ((int) scanRecord[startByte + 3] & 0xff) == 0x15) {
-                            patternFound = true;
-                            break;
-                        }
-                        startByte++;
-
-                    }
-                    // 如果找到了的话
-                    if (patternFound) {
-//                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                        // 轉換16進制
-                        byte[] uuidBytes = new byte[16];
-                        // 來源、起始位置
-                        System.arraycopy(scanRecord, startByte + 4, uuidBytes, 0, 16);
-                        String hexString = bytesToHex(uuidBytes);
-
-                        // UUID
-                        String uuid = hexString.substring(0, 8) + "-"
-                                + hexString.substring(8, 12) + "-"
-                                + hexString.substring(12, 16) + "-"
-                                + hexString.substring(16, 20) + "-"
-                                + hexString.substring(20, 32);
-                        String mac = device.getAddress();
-
-                        // Major
-                        int major = (scanRecord[startByte + 20] & 0xff) * 0x100
-                                + (scanRecord[startByte + 21] & 0xff);
-                        // Minor
-                        int minor = (scanRecord[startByte + 22] & 0xff) * 0x100
-                                + (scanRecord[startByte + 23] & 0xff);
-                        // txPower
-                        int txPower = (scanRecord[startByte + 24]);
-                        double distance = calculateAccuracy(txPower, rssi);
-                        String date = df.format(Calendar.getInstance().getTime());
-                        researchdata = uuid.toString() + "\t" + date + "\t" + rssi;
-                        Message msg = new Message();
-                        msg.what = 1;
-                        mHandler2.sendMessage(msg);
-                        Log.d(Tag, "Mac：" + mac
-                                + " \nUUID：" + uuid + "\nMajor：" + major + "\nMinor："
-                                + minor + "\nTxPower：" + txPower + "\nrssi：" + rssi);
-//                        Log.d(Tag, "distance：" + calculateAccuracy(txPower, rssi));
-//                        wrtieFileOnInternalStorage("//storage//emulated//0/Download//rssidata.txt",researchdata);
-                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
-
+    @Override
+    public void onBeaconServiceConnect() {
+//Start scanning for Lbeacon signal
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                Log.i("AAA","Beacon Size:"+beacons.size());
+                if (beacons.size() > 0) {
+                    Iterator<Beacon> beaconIterator = beacons.iterator();
+                    while (beaconIterator.hasNext()) {
+                        Beacon beacon = beaconIterator.next();
+                        logBeaconData(beacon);
                     }
                 }
-            };
+            }
 
+        });
+        try {
+            beaconManager.startRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId", null, null, null));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
     @SuppressLint("HandlerLeak")
     private Handler mHandler2 = new Handler(){
         @Override
@@ -254,14 +202,41 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         }
     };
+//    Parser Beacon data
+    private void logBeaconData(Beacon beacon) {
+        String[] beacondata = new String[]{
+                beacon.getId1().toString(),
+                beacon.getId2().toString(),
+                beacon.getId3().toString(),
+                String.valueOf(beacon.getRssi()),
+                String.valueOf(beacon.getDistance()),
+                String.valueOf(beacon.getBeaconTypeCode()),
+                String.valueOf(beacon.getIdentifiers())
+
+        };
+        String date = df.format(Calendar.getInstance().getTime());
+        researchdata = beacondata[1]+" "+beacondata[2]+"\t"+date+"\t"+beacondata[3];
+        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
+        Message msg = new Message();
+        msg.what = 1;
+        mHandler2.sendMessage(msg);
+            Log.i("AAA","beacon:"+researchdata);
+//            Log.i("AAA","Recieved ID: "+CConvX.concat(CConvY)+" Length: "+CConvX.concat(CConvY).length());
+    }
+//    output file
     public void wrtieFileOnInternalStorage(String sFileName, String sBody){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         file = new File(path,sFileName);
+        BufferedWriter buf;
         if(!file.exists()){
             try
             {
                 file.createNewFile();
                 file.setExecutable(true,false);
+                buf = new BufferedWriter(new FileWriter(file, true));
+                buf.append("ScanPeriod:"+ScanPeriod+"\tSleepTime:"+SleepTime);
+                buf.newLine();
+                buf.close();
             }
             catch (IOException e)
             {
@@ -270,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         }
         try{
-            BufferedWriter buf = new BufferedWriter(new FileWriter(file, true));
+            buf = new BufferedWriter(new FileWriter(file, true));
             buf.append(sBody);
             scrollView.fullScroll(View.FOCUS_DOWN);
             buf.newLine();
@@ -281,9 +256,29 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             e.printStackTrace();
         }
     }
+    public String bytesToHex(byte[] bytes) {
 
-    @Override
-    public void onBeaconServiceConnect() {
+        char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+    public double calculateAccuracy(int txPower, double rssi) {
+        if (rssi == 0) {
+            return -1.0;
+        }
+        double ratio = rssi * 1.0 / txPower;
+
+        if (ratio < 1.0) {
+            return Math.pow(ratio, 10);
+        } else {
+            double accuracy = (0.89976) * Math.pow(ratio, 7.7095) + 0.111;
+            return accuracy;
+        }
     }
 }
