@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //    Beacon manager for ranging Lbeaon signal
     private BeaconManager beaconManager;
     private Region region;
+    private int ScanPeriod = 1000,SleepTime = 2000;
 
 
 
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
 //        Beacon manager setup
         beaconManager =  BeaconManager.getInstanceForApplication(this);
-//        beaconManager.bind(this);
+//        Detect the LBeacon frame:
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-15,i:16-19,i:20-23,p:24-24"));
 
@@ -107,8 +108,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20"));
 
-        beaconManager.setForegroundScanPeriod(1000);
-        beaconManager.setForegroundBetweenScanPeriod(2000);
+        beaconManager.setForegroundScanPeriod(ScanPeriod);
+        beaconManager.setForegroundBetweenScanPeriod(SleepTime);
         region = new Region("justGiveMeEverything", null, null, null);
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
@@ -164,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 
         });
         try {
-            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId",
-                    null, null, null));
+            beaconManager.startRangingBeaconsInRegion(
+                    new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -195,10 +196,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 beacon.getId1().toString(),
                 beacon.getId2().toString(),
                 beacon.getId3().toString(),
-                String.valueOf(beacon.getRssi())
+                String.valueOf(beacon.getRssi()),
+                String.valueOf(beacon.getDistance()),
+                String.valueOf(beacon.getBeaconTypeCode()),
+                String.valueOf(beacon.getIdentifiers())
+
         };
         String date = df.format(Calendar.getInstance().getTime());
-        researchdata = beacondata[1]+beacondata[2]+"\t"+date+"\t"+beacondata[3];
+        researchdata = beacondata[1]+" "+beacondata[2]+"\t"+date+"\t"+beacondata[3];
+        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);
