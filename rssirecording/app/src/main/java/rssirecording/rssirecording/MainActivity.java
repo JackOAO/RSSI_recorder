@@ -57,9 +57,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private int i = 0;
 //    write out data
     private File file;
-    private EditText filenamedefine;
+    private EditText filenamedefine,ScanPeriodUI,SleepTimeUI;
     private int write_location_index;
-    String currentLBeaconID = "EmptyString";
 //    button
     private Button startB;
     private Button stopB;
@@ -80,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         showtxt = (TextView)findViewById(R.id.textView1);
         scrollView = (ScrollView) findViewById(R.id.scrollview1);
         filenamedefine = (EditText) findViewById(R.id.editText);
+        ScanPeriodUI = (EditText) findViewById(R.id.editText2);
+        SleepTimeUI = (EditText) findViewById(R.id.editText3);
         startB = (Button) findViewById(R.id.start);
         stopB = (Button) findViewById(R.id.stop);
         locationB = (Button) findViewById(R.id.location);
@@ -123,6 +124,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         public void onClick(View v) {
             if(v.getId() == startB.getId()){
                 filenamedefine.setClickable(false);
+                ScanPeriodUI.setClickable(false);
+                SleepTimeUI.setClickable(false);
+                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
+                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
+                beaconManager.setForegroundScanPeriod(ScanPeriod);
+                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
                 showtxt.setText("");
                 beaconManager.bind(MainActivity.this);
                 Log.i("AAA","start click");
@@ -215,11 +222,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     public void wrtieFileOnInternalStorage(String sFileName, String sBody){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         file = new File(path,sFileName);
+        BufferedWriter buf;
         if(!file.exists()){
             try
             {
                 file.createNewFile();
                 file.setExecutable(true,false);
+                buf = new BufferedWriter(new FileWriter(file, true));
+                buf.append("ScanPeriod:"+ScanPeriod+"\tSleepTime:"+SleepTime);
+                buf.newLine();
+                buf.close();
             }
             catch (IOException e)
             {
@@ -228,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         }
         try{
-            BufferedWriter buf = new BufferedWriter(new FileWriter(file, true));
+            buf = new BufferedWriter(new FileWriter(file, true));
             buf.append(sBody);
             scrollView.fullScroll(View.FOCUS_DOWN);
             buf.newLine();
