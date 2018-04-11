@@ -48,11 +48,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     Thread threadForHandleLbeaconID;
 //    flash screen
     private static Handler mHandler;
-<<<<<<< HEAD
 //    number is not correct
     private static final long SCAN_PERIOD = 1000;
-=======
->>>>>>> altbeaconUI
 //    time when receive beacon
     private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
 //    UI text
@@ -149,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 ++write_location_index;
                 wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
                         "write location"+write_location_index);
-                showtxt.setText("write location");
+                showtxt.setText("write location\n");
             }
 
         }
