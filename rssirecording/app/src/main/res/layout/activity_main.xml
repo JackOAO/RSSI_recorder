@@ -59,13 +59,13 @@
                 android:layout_weight="2"
                 android:ems="5"
                 android:inputType="number"
-                android:text="200" />
+                android:text="0" />
         </LinearLayout>
 
         <ScrollView
             android:id="@+id/scrollview1"
             android:layout_width="match_parent"
-            android:layout_height="350dp">
+            android:layout_height="330dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -88,28 +88,62 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/start"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Start" />
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/stop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Stop" />
+                <Button
+                    android:id="@+id/range_A"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="Clickevent"
+                    android:text="range A" />
 
-            <Button
-                android:id="@+id/location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                <Button
+                    android:id="@+id/location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="Clickevent"
+                    android:text="location" />
+
+                <Button
+                    android:id="@+id/range_B"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="Clickevent"
+                    android:text="range A" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="location" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/start"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="Clickevent"
+                    android:text="Start" />
+
+                <Button
+                    android:id="@+id/stop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="Clickevent"
+                    android:text="Stop" />
+            </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
 

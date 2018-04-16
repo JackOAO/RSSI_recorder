@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -61,6 +63,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private File file;
     private EditText filenamedefine,ScanPeriodUI,SleepTimeUI;
     private int write_location_index;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION};
 //    button
     private Button startB;
     private Button stopB;
@@ -69,9 +77,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconManager beaconManager;
     private Region region;
     private int ScanPeriod = 1000,SleepTime = 2000;
-
-
-
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +91,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         startB = (Button) findViewById(R.id.start);
         stopB = (Button) findViewById(R.id.stop);
         locationB = (Button) findViewById(R.id.location);
-        startB.setOnClickListener(ClickIntHere);
-        stopB.setOnClickListener(ClickIntHere);
-        locationB.setOnClickListener(ClickIntHere);
+//        startB.setOnClickListener(ClickIntHere);
+//        stopB.setOnClickListener(ClickIntHere);
+//        locationB.setOnClickListener(ClickIntHere);
 //        handler
         mHandler = new Handler(); //UI text flash
 
@@ -116,41 +121,57 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         region = new Region("justGiveMeEverything", null, null, null);
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
-        ActivityCompat.requestPermissions(
-                this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
+        ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 1001);
         beaconManager.unbind(this);
     }
-    private View.OnClickListener ClickIntHere = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if(v.getId() == startB.getId()){
-                filenamedefine.setClickable(false);
-                ScanPeriodUI.setClickable(false);
-                SleepTimeUI.setClickable(false);
-                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
-                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
-                beaconManager.setForegroundScanPeriod(ScanPeriod);
-                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
-                showtxt.setText("");
-                beaconManager.bind(MainActivity.this);
-                Log.i("AAA","start click");
-//                scanLeDevice(true);
-            }
-            else if(v.getId() == stopB.getId()){
-                filenamedefine.setClickable(true);
-//                scanLeDevice(false);
-                beaconManager.unbind(MainActivity.this);
-            }
-            else if(v.getId() == locationB.getId()){
-                ++write_location_index;
-                wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
-                        "write location"+write_location_index);
-                showtxt.setText("write location\n");
-            }
-
-        }
-    };
+//    private View.OnClickListener ClickIntHere = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            if(v.getId() == startB.getId()){
+//                filenamedefine.setClickable(false);
+//                ScanPeriodUI.setClickable(false);
+//                SleepTimeUI.setClickable(false);
+//                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
+//                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
+//                beaconManager.setForegroundScanPeriod(ScanPeriod);
+//                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
+//                showtxt.setText("");
+//                beaconManager.bind(MainActivity.this);
+//                Log.i("AAA","start click");
+////                scanLeDevice(true);
+//            }
+//            else if(v.getId() == stopB.getId()){
+//                filenamedefine.setClickable(true);
+////                scanLeDevice(false);
+//                beaconManager.unbind(MainActivity.this);
+//            }
+//            else if(v.getId() == locationB.getId()){
+//                String locBtest_body = "";
+//                switch (write_location_index%3){
+//                    case 0:
+//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+//                                "write range A");
+//                        locBtest_body = "write location";
+//                        showtxt.append("write range A\n");
+//                        break;
+//                    case 1:
+//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+//                                "write location"+write_location_index);
+//                        locBtest_body = "write range B";
+//                        showtxt.append("write location\n");
+//                        break;
+//                    case 2:
+//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+//                                "write range B");
+//                        locBtest_body = "write range A";
+//                        showtxt.append("write range B\n");
+//                        break;
+//                }
+//                ++write_location_index;
+//                locationB.setText(locBtest_body);
+//            }
+//        }
+//    };
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -187,9 +208,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-                    showtxt.setText(showtxt.getText()+researchdata+"\n");
+                    showtxt.append(researchdata+"\n");
                     i++;
-                    if(i>30) {
+                    if(i>100) {
                         showtxt.setText("");
                         i=0;
                     }
@@ -218,11 +239,52 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         msg.what = 1;
         mHandler2.sendMessage(msg);
             Log.i("AAA","beacon:"+researchdata);
-//            Log.i("AAA","Recieved ID: "+CConvX.concat(CConvY)+" Length: "+CConvX.concat(CConvY).length());
     }
 //    output file
+    public void Clickevent(View view){
+//    Toast.makeText(this,
+//            "Button Clicked", Toast.LENGTH_LONG).show();
+        switch (view.getId()){
+            case R.id.start:
+                filenamedefine.setClickable(false);
+                ScanPeriodUI.setClickable(false);
+                SleepTimeUI.setClickable(false);
+                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
+                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
+                beaconManager.setForegroundScanPeriod(ScanPeriod);
+                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
+                showtxt.setText("");
+                write_location_index = 0;
+                beaconManager.bind(MainActivity.this);
+                Log.i("AAA","start click");
+                break;
+            case R.id.stop:
+                filenamedefine.setClickable(true);
+                ScanPeriodUI.setClickable(true);
+                SleepTimeUI.setClickable(true);
+                beaconManager.unbind(MainActivity.this);
+                break;
+            case R.id.range_A:
+                wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+                        "write range A");
+                showtxt.append("write range A\n");
+                break;
+            case R.id.range_B:
+                wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+                        "write range B");
+                showtxt.append("write range B\n");
+                break;
+            case R.id.location:
+                wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
+                        "write location"+write_location_index);
+                ++write_location_index;
+                showtxt.append("write location\n");
+                break;
+            }
+    }
     public void wrtieFileOnInternalStorage(String sFileName, String sBody){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        Log.i("CCC",path.toString());
         file = new File(path,sFileName);
         BufferedWriter buf;
         if(!file.exists()){
