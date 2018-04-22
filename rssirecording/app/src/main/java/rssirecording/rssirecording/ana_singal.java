@@ -29,6 +29,8 @@ public class ana_singal {
                 find_max = data_list.get(i);
                 findmaxrssi = ana_data[i];
             }
+//            Log.i("Queue2", data_list.get(i)+","+ana_data[i]+"\t");
+//            Log.i("Queue3", find_max + "," + findmaxrssi + "\t");
         }
         return find_max;
     }

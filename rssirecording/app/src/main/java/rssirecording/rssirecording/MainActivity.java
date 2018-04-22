@@ -186,12 +186,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //        if (data_queue.size() > 10){
 //            data_queue.poll();
 //        }
-//        get_location = as.ana_singal_1(data_queue);
         if (data_queue.size() == 10){
             get_location = as.ana_singal_1(data_queue);
 //            get_location = as.ana_singal_2(data_queue,5);
             data_queue.clear();
         }
+
+//        List tmpQ = new ArrayList(data_queue);
+
+//        as.ana_singal_2(data_queue);
+//        Log.i("Queue4", tmpQ.toString());
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);

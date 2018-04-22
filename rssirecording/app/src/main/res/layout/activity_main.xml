@@ -105,6 +105,8 @@
             android:layout_height="wrap_content"
             android:textSize="20dp"
             android:gravity="center"
+            android:textColor="0xFFFFFF"
+            android:background="@color/textback1"
             android:text="Now at :" />
 
         <LinearLayout
