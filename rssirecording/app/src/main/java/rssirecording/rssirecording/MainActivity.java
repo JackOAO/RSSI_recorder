@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private Region region;
     private int ScanPeriod = 1000,SleepTime = 2000;
     private Queue<List<String>> data_queue = new LinkedList<>();
+    private ana_singal as = new ana_singal();
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,8 +214,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         if (data_queue.size() > 10){
             data_queue.poll();
         }
-        List tmpQ = new ArrayList(data_queue);
-        ana_singal(tmpQ);
+//        List tmpQ = new ArrayList(data_queue);
+        as.ana_singal_1(data_queue);
+//        as.ana_singal_2(data_queue);
 //        Log.i("Queue4", tmpQ.toString());
 
 
@@ -224,15 +226,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             Log.i("AAA","beacon:"+researchdata);
     }
 //    output file
-    public String ana_singal(List q){
-        String[][] data_array = new String[10][2];
-//        Log.i("Queue2", q.toString());
-        for(int i = 0;i < q.size();i++){
-            List tmpQ = (List<String>) q.get(i);
-            data_array[i] = new String[]{(String) tmpQ.get(0), (String) tmpQ.get(1)};
-        }
-        return "";
-    }
+
     public void Clickevent(View view){
 //    Toast.makeText(this,
 //            "Button Clicked", Toast.LENGTH_LONG).show();
