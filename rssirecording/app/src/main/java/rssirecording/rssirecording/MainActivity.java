@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //        if (data_queue.size() > 10){
 //            data_queue.poll();
 //        }
+//        get_location = as.ana_singal_1(data_queue);
         if (data_queue.size() == 10){
             get_location = as.ana_singal_1(data_queue);
 //            get_location = as.ana_singal_2(data_queue,5);
