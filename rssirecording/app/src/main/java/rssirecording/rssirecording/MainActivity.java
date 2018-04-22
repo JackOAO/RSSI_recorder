@@ -5,7 +5,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,11 +17,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -36,9 +34,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer {
@@ -55,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //    time when receive beacon
     private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
 //    UI text
-    private TextView showtxt;
+    private TextView showtxt,showlocation;
     private ScrollView scrollView;
     private String researchdata;
     private int i = 0;
@@ -63,20 +67,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private File file;
     private EditText filenamedefine,ScanPeriodUI,SleepTimeUI;
     private int write_location_index;
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION};
-//    button
-    private Button startB;
-    private Button stopB;
-    private Button locationB;
 //    Beacon manager for ranging Lbeaon signal
     private BeaconManager beaconManager;
     private Region region;
     private int ScanPeriod = 1000,SleepTime = 2000;
+    private Queue<List<String>> data_queue = new LinkedList<>();
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,19 +84,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         setContentView(R.layout.activity_main);
 //        init UI objects
         showtxt = (TextView)findViewById(R.id.textView1);
+        showlocation = (TextView)findViewById(R.id.locationtext);
         scrollView = (ScrollView) findViewById(R.id.scrollview1);
         filenamedefine = (EditText) findViewById(R.id.editText);
         ScanPeriodUI = (EditText) findViewById(R.id.editText2);
         SleepTimeUI = (EditText) findViewById(R.id.editText3);
-        startB = (Button) findViewById(R.id.start);
-        stopB = (Button) findViewById(R.id.stop);
-        locationB = (Button) findViewById(R.id.location);
-//        startB.setOnClickListener(ClickIntHere);
-//        stopB.setOnClickListener(ClickIntHere);
-//        locationB.setOnClickListener(ClickIntHere);
-//        handler
         mHandler = new Handler(); //UI text flash
-
 //        Beacon manager setup
         beaconManager =  BeaconManager.getInstanceForApplication(this);
 //        Detect the LBeacon frame:
@@ -122,56 +115,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
         ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 1001);
-        beaconManager.unbind(this);
+//        beaconManager.unbind(this);
+        beaconManager.bind(this);
     }
-//    private View.OnClickListener ClickIntHere = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            if(v.getId() == startB.getId()){
-//                filenamedefine.setClickable(false);
-//                ScanPeriodUI.setClickable(false);
-//                SleepTimeUI.setClickable(false);
-//                ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
-//                SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
-//                beaconManager.setForegroundScanPeriod(ScanPeriod);
-//                beaconManager.setForegroundBetweenScanPeriod(SleepTime);
-//                showtxt.setText("");
-//                beaconManager.bind(MainActivity.this);
-//                Log.i("AAA","start click");
-////                scanLeDevice(true);
-//            }
-//            else if(v.getId() == stopB.getId()){
-//                filenamedefine.setClickable(true);
-////                scanLeDevice(false);
-//                beaconManager.unbind(MainActivity.this);
-//            }
-//            else if(v.getId() == locationB.getId()){
-//                String locBtest_body = "";
-//                switch (write_location_index%3){
-//                    case 0:
-//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
-//                                "write range A");
-//                        locBtest_body = "write location";
-//                        showtxt.append("write range A\n");
-//                        break;
-//                    case 1:
-//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
-//                                "write location"+write_location_index);
-//                        locBtest_body = "write range B";
-//                        showtxt.append("write location\n");
-//                        break;
-//                    case 2:
-//                        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",
-//                                "write range B");
-//                        locBtest_body = "write range A";
-//                        showtxt.append("write range B\n");
-//                        break;
-//                }
-//                ++write_location_index;
-//                locationB.setText(locBtest_body);
-//            }
-//        }
-//    };
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -208,7 +154,33 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
+//                    for (int i =0;i<tmp_list.size();i++) {
+//                        String tmp_UUId = ((List<String>) tmp_list.get(i)).get(0);
+//                        if (o_member.indexOf(tmp_UUId)==-1){
+//                            List<String> RSSI_list = new ArrayList<String>();
+//                            Log.i("Queue4", o_member.toString());
+//                            float count = 0;
+//                            for (int j = 0; j < tmp_list.size(); j++){
+//                                float tmp_float = Float.parseFloat(((List<String>) tmp_list.get(j)).get(1));
+//                                String tmp = ((List<String>) tmp_list.get(j)).get( 0);
+//                                Log.i("Queue4", ((List<String>) tmp_list.get(j)).get(0)+
+//                                        "\t"+((List<String>) tmp_list.get(j)).get(1)+
+//                                        "\t"+o_member.indexOf(tmp));
+//                                if(o_member.indexOf(tmp) != -1) {
+//                                    count += tmp_float;
+//                                    RSSI_list.add(((List<String>) tmp_list.get(j)).get(1));
+//                                }
+//                            }
+//                            Log.i("Queue3", RSSI_list.toString());
+//                            o_member.add(RSSI_list);
+//                            String[] tmp_str = ((List<String>) tmp_list.get(i)).toArray
+//                                    (new String[((List<String>) tmp_list.get(i)).size()]);
+//                            Log.i("Queue2", ((List<String>) tmp_list.get(i)).get(2));
+//                        }
+//                    }
+//                    Log.i("Queue2", o_member.toString());
                     showtxt.append(researchdata+"\n");
+
                     i++;
                     if(i>100) {
                         showtxt.setText("");
@@ -220,7 +192,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             }
         }
     };
-//    Parser Beacon data
+
+    //    Parser Beacon data
     private void logBeaconData(Beacon beacon) {
         String[] beacondata = new String[]{
                 beacon.getId1().toString(),
@@ -234,13 +207,32 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         };
         String date = df.format(Calendar.getInstance().getTime());
         researchdata = beacondata[1]+" "+beacondata[2]+"\t"+date+"\t"+beacondata[3];
-        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
+//        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
+        List<String> data_list = Arrays.asList(beacondata[1].concat(beacondata[2]),beacondata[3]);
+        data_queue.offer(data_list);
+        if (data_queue.size() > 10){
+            data_queue.poll();
+        }
+        List tmpQ = new ArrayList(data_queue);
+        ana_singal(tmpQ);
+//        Log.i("Queue4", tmpQ.toString());
+
+
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);
             Log.i("AAA","beacon:"+researchdata);
     }
 //    output file
+    public String ana_singal(List q){
+        String[][] data_array = new String[10][2];
+//        Log.i("Queue2", q.toString());
+        for(int i = 0;i < q.size();i++){
+            List tmpQ = (List<String>) q.get(i);
+            data_array[i] = new String[]{(String) tmpQ.get(0), (String) tmpQ.get(1)};
+        }
+        return "";
+    }
     public void Clickevent(View view){
 //    Toast.makeText(this,
 //            "Button Clicked", Toast.LENGTH_LONG).show();
@@ -249,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 filenamedefine.setClickable(false);
                 ScanPeriodUI.setClickable(false);
                 SleepTimeUI.setClickable(false);
+                data_queue.clear();
                 ScanPeriod = Integer.valueOf(ScanPeriodUI.getText().toString());
                 SleepTime = Integer.valueOf(SleepTimeUI.getText().toString());
                 beaconManager.setForegroundScanPeriod(ScanPeriod);
