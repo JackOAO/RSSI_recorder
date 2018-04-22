@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         bluetoothManager = (BluetoothManager)
                 getSystemService(Context.BLUETOOTH_SERVICE);
         ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 1001);
-//        beaconManager.unbind(this);
-        beaconManager.bind(this);
+        beaconManager.unbind(this);
+//        beaconManager.bind(this);
     }
     @Override
     protected void onDestroy() {
@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 case 1:
                     showtxt.append(researchdata+"\n");
                     showlocation.setText("Now at :"+get_location);
+                    scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
                     if(i>100) {
                         showtxt.setText("");
@@ -183,14 +184,20 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         };
         String date = df.format(Calendar.getInstance().getTime());
         researchdata = beacondata[1]+" "+beacondata[2]+"\t"+date+"\t"+beacondata[3];
-//        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
+        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
         List<String> data_list = Arrays.asList(beacondata[1].concat(beacondata[2]),beacondata[3]);
         data_queue.offer(data_list);
-        if (data_queue.size() > 10){
-            data_queue.poll();
+//        if (data_queue.size() > 10){
+//            data_queue.poll();
+//        }
+        if (data_queue.size() == 10){
+            get_location = as.ana_singal_1(data_queue);
+            if(showlocation.bac)
+            data_queue.clear();
         }
+
 //        List tmpQ = new ArrayList(data_queue);
-        get_location = as.ana_singal_1(data_queue);
+
 //        as.ana_singal_2(data_queue);
 //        Log.i("Queue4", tmpQ.toString());
         Message msg = new Message();
@@ -266,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         try{
             buf = new BufferedWriter(new FileWriter(file, true));
             buf.append(sBody);
-            scrollView.fullScroll(View.FOCUS_DOWN);
             buf.newLine();
             buf.close();
             Log.d(Tag, "success"+file.getAbsolutePath());
