@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //    UI text
     private TextView showtxt,showlocation;
     private ScrollView scrollView;
-    private String researchdata;
+    private String researchdata,get_location;
     private int i = 0;
 //    write out data
     private File file;
@@ -155,33 +155,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-//                    for (int i =0;i<tmp_list.size();i++) {
-//                        String tmp_UUId = ((List<String>) tmp_list.get(i)).get(0);
-//                        if (o_member.indexOf(tmp_UUId)==-1){
-//                            List<String> RSSI_list = new ArrayList<String>();
-//                            Log.i("Queue4", o_member.toString());
-//                            float count = 0;
-//                            for (int j = 0; j < tmp_list.size(); j++){
-//                                float tmp_float = Float.parseFloat(((List<String>) tmp_list.get(j)).get(1));
-//                                String tmp = ((List<String>) tmp_list.get(j)).get( 0);
-//                                Log.i("Queue4", ((List<String>) tmp_list.get(j)).get(0)+
-//                                        "\t"+((List<String>) tmp_list.get(j)).get(1)+
-//                                        "\t"+o_member.indexOf(tmp));
-//                                if(o_member.indexOf(tmp) != -1) {
-//                                    count += tmp_float;
-//                                    RSSI_list.add(((List<String>) tmp_list.get(j)).get(1));
-//                                }
-//                            }
-//                            Log.i("Queue3", RSSI_list.toString());
-//                            o_member.add(RSSI_list);
-//                            String[] tmp_str = ((List<String>) tmp_list.get(i)).toArray
-//                                    (new String[((List<String>) tmp_list.get(i)).size()]);
-//                            Log.i("Queue2", ((List<String>) tmp_list.get(i)).get(2));
-//                        }
-//                    }
-//                    Log.i("Queue2", o_member.toString());
                     showtxt.append(researchdata+"\n");
-
+                    showlocation.setText("Now at :"+get_location);
                     i++;
                     if(i>100) {
                         showtxt.setText("");
@@ -215,11 +190,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             data_queue.poll();
         }
 //        List tmpQ = new ArrayList(data_queue);
-        as.ana_singal_1(data_queue);
+        get_location = as.ana_singal_1(data_queue);
 //        as.ana_singal_2(data_queue);
 //        Log.i("Queue4", tmpQ.toString());
-
-
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);
