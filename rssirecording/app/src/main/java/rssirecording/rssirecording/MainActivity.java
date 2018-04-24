@@ -152,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             switch (msg.what){
                 case 1:
                     showtxt.append(researchdata+"\n");
-                    Log.i("SL",get_location);
                     showlocation.setText("Now at :"+trotid.trUUID(get_location));
                     scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
