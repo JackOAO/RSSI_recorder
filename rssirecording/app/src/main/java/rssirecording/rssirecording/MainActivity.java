@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -153,6 +154,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 case 1:
                     showtxt.append(researchdata+"\n");
                     showlocation.setText("Now at :"+trotid.trUUID(get_location));
+                    Log.i("SL", String.valueOf(showlocation.getCurrentTextColor()));
+                    if (showlocation.getCurrentTextColor() == Color.BLUE)
+                        showlocation.setTextColor(Color.RED);
+                    else showlocation.setTextColor(Color.BLUE);
                     scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
                     if(i>100) {
