@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -50,18 +49,14 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     protected final String Tag = "BeaconSearch";
-//    Thread for handling Lbeacon ID while in a navigation tour
-    Thread threadForHandleLbeaconID;
 //    flash screen
     private static Handler mHandler;
-//    number is not correct
-    private static final long SCAN_PERIOD = 1000;
 //    time when receive beacon
     private DateFormat df = new SimpleDateFormat("h:mm:ss.SSS");
 //    UI text
     private TextView showtxt,showlocation;
     private ScrollView scrollView;
-    private String researchdata,get_location;
+    private String researchdata,get_location="";
     private int i = 0;
 //    write out data
     private File file;
@@ -78,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private int ScanPeriod = 1000,SleepTime = 2000;
     private Queue<List<String>> data_queue = new LinkedList<>();
     private ana_singal as = new ana_singal();
+    private UUIDtoID trotid = new UUIDtoID();
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             switch (msg.what){
                 case 1:
                     showtxt.append(researchdata+"\n");
-                    showlocation.setText("Now at :"+get_location);
+                    showlocation.setText("Now at :"+trotid.trUUID(get_location));
                     scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
                     if(i>100) {
@@ -190,26 +186,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //        if (data_queue.size() > 10){
 //            data_queue.poll();
 //        }
+//        get_location = as.ana_singal_1(data_queue);
         if (data_queue.size() == 10){
             get_location = as.ana_singal_1(data_queue);
-            if(showlocation.bac)
+//            get_location = as.ana_singal_2(data_queue,5);
             data_queue.clear();
         }
-
-//        List tmpQ = new ArrayList(data_queue);
-
-//        as.ana_singal_2(data_queue);
-//        Log.i("Queue4", tmpQ.toString());
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);
-            Log.i("AAA","beacon:"+researchdata);
+//        Log.i("AAA","beacon:"+researchdata);
     }
-//    output file
-
     public void Clickevent(View view){
-//    Toast.makeText(this,
-//            "Button Clicked", Toast.LENGTH_LONG).show();
         switch (view.getId()){
             case R.id.start:
                 filenamedefine.setClickable(false);
