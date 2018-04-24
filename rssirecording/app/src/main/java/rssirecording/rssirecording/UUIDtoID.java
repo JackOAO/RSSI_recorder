@@ -2,7 +2,7 @@ package rssirecording.rssirecording;
 
 public class UUIDtoID {
     public String trUUID (String s){
-        s = ptr(s);
+
         return s;
     }
     private String ptr(String s) {
@@ -40,7 +40,7 @@ public class UUIDtoID {
             case "0x2f94bd410x3c0df142":
                 return "A20";
             default:
-                return "notfind";
+                return s;
         }
     }
 }

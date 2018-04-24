@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             switch (msg.what){
                 case 1:
                     showtxt.append(researchdata+"\n");
+                    Log.i("SL",get_location);
                     showlocation.setText("Now at :"+trotid.trUUID(get_location));
                     scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
@@ -192,11 +193,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
 //            get_location = as.ana_singal_2(data_queue,5);
             data_queue.clear();
         }
-
-//        List tmpQ = new ArrayList(data_queue);
-
-//        as.ana_singal_2(data_queue);
-//        Log.i("Queue4", tmpQ.toString());
         Message msg = new Message();
         msg.what = 1;
         mHandler2.sendMessage(msg);
