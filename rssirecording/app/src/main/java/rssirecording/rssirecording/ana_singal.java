@@ -1,5 +1,7 @@
 package rssirecording.rssirecording;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Queue;
 //Log.i("Queue2", o_member.toString());
 public class ana_singal {
+    private Queue<String> weight_queue = new LinkedList<>();
     public String ana_singal_1(Queue q){
         List lq = new ArrayList<String>(q);
         List<String> data_list = new ArrayList<>();
@@ -45,7 +48,6 @@ public class ana_singal {
         for (int i = 0; i<w; i++)
             weight_list.add((int) Math.pow(2,i));
         Collections.reverse(weight_list);
-        Queue<String> weight_queue = new LinkedList<>();
         String find_max = "";
         for (int i=0; i<data_list.size(); i++) {
             int count = 0, count_rssi = 0;
@@ -54,15 +56,17 @@ public class ana_singal {
                     count_rssi += Integer.parseInt(((List<String>) lq.get(j)).get(1));
                     count++;
                 }
-            ana_data.add((float) (count_rssi / count));
-            if (ana_data.get(i) > findmaxrssi) {
+            ana_data.add((float)(count_rssi/count));
+            if (ana_data.get(i) > findmaxrssi){
                 find_max = data_list.get(i);
                 findmaxrssi = ana_data.get(i);
-                ana_data.clear();
             }
         }
+        Log.i("SL",ana_data.toString());
+        Log.i("SL1",ana_data.get(0).toString());
         weight_queue.add(find_max);
         if (weight_queue.size()>w) weight_queue.poll();
+        Log.i("SL2",weight_queue.toString());
 
 
 

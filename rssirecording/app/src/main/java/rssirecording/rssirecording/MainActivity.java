@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private BeaconManager beaconManager;
     private Region region;
     private int ScanPeriod = 1000,SleepTime = 2000;
+    private Boolean testcolorchangemsg = true,temp_msg = true;
     private Queue<List<String>> data_queue = new LinkedList<>();
     private ana_singal as = new ana_singal();
     private UUIDtoID trotid = new UUIDtoID();
@@ -154,10 +155,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
                 case 1:
                     showtxt.append(researchdata+"\n");
                     showlocation.setText("Now at :"+trotid.trUUID(get_location));
-                    Log.i("SL", String.valueOf(showlocation.getCurrentTextColor()));
-                    if (showlocation.getCurrentTextColor() == Color.BLUE)
-                        showlocation.setTextColor(Color.RED);
-                    else showlocation.setTextColor(Color.BLUE);
+                    if (testcolorchangemsg != temp_msg) {
+                        temp_msg = testcolorchangemsg;
+                        if (showlocation.getCurrentTextColor() == Color.BLUE)
+                            showlocation.setTextColor(Color.RED);
+                        else showlocation.setTextColor(Color.BLUE);
+                    }
                     scrollView.fullScroll(View.FOCUS_DOWN);
                     i++;
                     if(i>100) {
@@ -185,16 +188,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
         };
         String date = df.format(Calendar.getInstance().getTime());
         researchdata = beacondata[1]+" "+beacondata[2]+"\t"+date+"\t"+beacondata[3];
-        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
+//        wrtieFileOnInternalStorage(filenamedefine.getText()+".txt",researchdata);
         List<String> data_list = Arrays.asList(beacondata[1].concat(beacondata[2]),beacondata[3]);
         data_queue.offer(data_list);
 //        if (data_queue.size() > 10){
 //            data_queue.poll();
 //        }
 //        get_location = as.ana_singal_1(data_queue);
+        Log.i("SL12", String.valueOf(data_queue.size()));
         if (data_queue.size() == 10){
-            get_location = as.ana_singal_1(data_queue);
-//            get_location = as.ana_singal_2(data_queue,5);
+//            get_location = as.ana_singal_1(data_queue);
+            get_location = as.ana_singal_2(data_queue,5);
+            testcolorchangemsg = !testcolorchangemsg;
             data_queue.clear();
         }
         Message msg = new Message();
@@ -244,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     }
     public void wrtieFileOnInternalStorage(String sFileName, String sBody){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        Log.i("CCC",path.toString());
         file = new File(path,sFileName);
         BufferedWriter buf;
         if(!file.exists()){
