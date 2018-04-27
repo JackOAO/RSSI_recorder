@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
     private Boolean testcolorchangemsg = true,temp_msg = true;
     private Queue<List<String>> data_queue = new LinkedList<>();
     private ana_singal as = new ana_singal();
-    private UUIDtoID trotid = new UUIDtoID();
+    private UUIDtoID trtoid = new UUIDtoID();
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer {
             switch (msg.what){
                 case 1:
                     showtxt.append(researchdata+"\n");
-                    showlocation.setText("Now at :"+trotid.trUUID(get_location));
+                    showlocation.setText("Now at :"+trtoid.trUUID(get_location));
                     if (testcolorchangemsg != temp_msg) {
                         temp_msg = testcolorchangemsg;
                         if (showlocation.getCurrentTextColor() == Color.BLUE)

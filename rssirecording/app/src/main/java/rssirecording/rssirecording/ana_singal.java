@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Queue;
 //Log.i("Queue2", o_member.toString());
 public class ana_singal {
-    private Queue<String> weight_queue = new LinkedList<>();
+    private Queue<siganl_data_type> weight_queue = new LinkedList<>();
     public String ana_singal_1(Queue q){
         List lq = new ArrayList<String>(q);
         List<String> data_list = new ArrayList<>();
@@ -43,7 +43,7 @@ public class ana_singal {
             if (data_list.indexOf(((List<String>) lq.get(i)).get(0)) == -1)
                 data_list.add(((List<String>) lq.get(i)).get(0));
         List<Float> ana_data = new ArrayList<>();
-        float findmaxrssi = -999;
+        int findmaxrssi = -999;
         List<Integer> weight_list = new ArrayList<>();
         for (int i = 0; i<w; i++)
             weight_list.add((int) Math.pow(2,i));
@@ -59,16 +59,21 @@ public class ana_singal {
             ana_data.add((float)(count_rssi/count));
             if (ana_data.get(i) > findmaxrssi){
                 find_max = data_list.get(i);
-                findmaxrssi = ana_data.get(i);
+                findmaxrssi = Math.round(ana_data.get(i));
             }
         }
-        Log.i("SL",ana_data.toString());
-        Log.i("SL1",ana_data.get(0).toString());
-        weight_queue.add(find_max);
+        data_list.clear();
+        siganl_data_type sdt = new siganl_data_type(find_max,findmaxrssi);
+        weight_queue.add(sdt);
         if (weight_queue.size()>w) weight_queue.poll();
-        Log.i("SL2",weight_queue.toString());
+        List<siganl_data_type> get_queue_list = new ArrayList(weight_queue);
 
 
+
+
+//        for (int i = 0;i < weight_queue.size();i++)
+//            if (data_list.indexOf(get_queue_list.get(i)) == -1)
+//                data_list.add(get_queue_list.get(i));
 
         return find_max;
     }
