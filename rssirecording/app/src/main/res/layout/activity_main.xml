@@ -9,13 +9,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <!--<lecho.lib.hellocharts.view.ColumnChartView-->
-            <!--android:id="@+id/chart"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="206dp"-->
-            <!--android:layout_centerHorizontal="true" />-->
+        <!--android:id="@+id/chart"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="206dp"-->
+        <!--android:layout_centerHorizontal="true" />-->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="45dp"
@@ -25,18 +28,17 @@
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15dp"
                 android:layout_weight="1"
-                android:text="File name:" />
-
-            <EditText
+                android:text="File name:"
+                android:textSize="15dp" />
+         <EditText
                 android:id="@+id/editText"
                 android:layout_width="287dp"
-                android:textSize="18dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:inputType="textPersonName"
-                android:text="@string/rssitestfile" />
+                android:text="@string/rssitestfile"
+                android:textSize="18dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -51,23 +53,22 @@
                 android:layout_weight="1"
                 android:text="ScanTime"
                 android:textSize="15dp" />
-
             <EditText
                 android:id="@+id/editText2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:textSize="18dp"
                 android:inputType="number"
-                android:text="300" />
+                android:text="100"
+                android:textSize="18dp" />
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="15dp"
-                android:text="ScanRate" />
+                android:text="ScanRate"
+                android:textSize="15dp" />
 
             <EditText
                 android:id="@+id/editText3"
@@ -75,14 +76,29 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:inputType="number"
-                android:textSize="18dp"
-                android:text="0" />
+                android:text="0"
+                android:textSize="18dp" />
         </LinearLayout>
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="locSwitch" />
+
+        <TextView
+            android:id="@+id/locationtext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Now at :"
+            android:textSize="20dp" />
 
         <ScrollView
             android:id="@+id/scrollview1"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="250dp"
             android:layout_alignParentBottom="true">
 
             <LinearLayout
@@ -99,22 +115,15 @@
             </LinearLayout>
         </ScrollView>
 
-        <TextView
-            android:id="@+id/locationtext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:gravity="center"
-            android:text="Now at :" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="113dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
 

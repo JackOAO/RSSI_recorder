@@ -22,6 +22,19 @@ public class siganl_data_type {
     public int getrssi(int i){
         return rssi.get(i);
     }
+    public String getrssilist(){
+        return rssi.toString();
+    }
+    public int getrssi(){
+        return rssi.get(0);
+    }
+    public int countsum(){
+        int count=0;
+        for (int i:rssi){
+            count += i;
+        }
+        return count;
+    }
     public float countavg(){
         int count=0,num=0;
         for (int i:rssi){

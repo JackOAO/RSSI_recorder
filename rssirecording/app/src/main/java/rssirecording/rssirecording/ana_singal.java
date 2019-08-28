@@ -68,23 +68,25 @@ public class ana_singal {
             weight_queue.poll();
         }
         List<siganl_data_type> get_weight_data= new ArrayList<>(weight_queue);
+        List<String> tmplistUUID = new ArrayList<>();
         List<siganl_data_type> count_data_weight= new ArrayList<>();
         for (int i = 0;i < get_weight_data.size();i++) {
-            if (count_data_weight.indexOf(get_weight_data.get(i)) == -1) {
+            if (tmplistUUID.indexOf(get_weight_data.get(i).getUuid()) == -1) {
+                tmplistUUID.add(get_weight_data.get(i).getUuid());
                 count_data_weight.add(new siganl_data_type(get_weight_data.get(i).getUuid()
-                        ,(get_weight_data.get(i).getrssi(0))*weight_list.get(i)));
+                        ,(get_weight_data.get(i).getrssi())*weight_list.get(i)));
             }
             else {
                 count_data_weight.get(
-                        count_data_weight.indexOf(
-                                get_weight_data.get(i))).
-                        setvalue((get_weight_data.get(i).getrssi(0))*weight_list.get(i));
+                        tmplistUUID.indexOf(
+                                get_weight_data.get(i).getUuid())).
+                        setvalue((get_weight_data.get(i).getrssi())*weight_list.get(i));
             }
         }
         for (int i = 0; i < count_data_weight.size(); i++){
             Log.i("SL12",count_data_weight.get(i).getUuid()+
-                    "\t" +count_data_weight.get(i).countavg());
-            if (findmaxrssi < count_data_weight.get(i).countavg())
+                    "\t" +count_data_weight.get(i).getrssilist());
+            if (findmaxrssi < count_data_weight.get(i).countsum())
                 find_max = count_data_weight.get(i).getUuid();
         }
         return find_max;
